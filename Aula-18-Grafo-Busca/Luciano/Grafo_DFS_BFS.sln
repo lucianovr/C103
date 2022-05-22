@@ -1,0 +1,31 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.32228.343
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Grafo_DFS_BFS", "Grafo_DFS_BFS.vcxproj", "{A47D8DE7-2182-40C3-9D34-C728F22E2092}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|x64 = Debug|x64
+		Debug|x86 = Debug|x86
+		Release|x64 = Release|x64
+		Release|x86 = Release|x86
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{A47D8DE7-2182-40C3-9D34-C728F22E2092}.Debug|x64.ActiveCfg = Debug|x64
+		{A47D8DE7-2182-40C3-9D34-C728F22E2092}.Debug|x64.Build.0 = Debug|x64
+		{A47D8DE7-2182-40C3-9D34-C728F22E2092}.Debug|x86.ActiveCfg = Debug|Win32
+		{A47D8DE7-2182-40C3-9D34-C728F22E2092}.Debug|x86.Build.0 = Debug|Win32
+		{A47D8DE7-2182-40C3-9D34-C728F22E2092}.Release|x64.ActiveCfg = Release|x64
+		{A47D8DE7-2182-40C3-9D34-C728F22E2092}.Release|x64.Build.0 = Release|x64
+		{A47D8DE7-2182-40C3-9D34-C728F22E2092}.Release|x86.ActiveCfg = Release|Win32
+		{A47D8DE7-2182-40C3-9D34-C728F22E2092}.Release|x86.Build.0 = Release|Win32
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {4705D15F-CE5D-44BF-B730-8BD238753B70}
+	EndGlobalSection
+EndGlobal
