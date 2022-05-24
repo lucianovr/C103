@@ -1,0 +1,903 @@
+\begin{comment}
+
+\documentclass{beamer}
+\usepackage[latin1]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[frenchb]{babel}
+%%%%%% Géométrie: Cursives en mode maths %%%%%%
+
+%%%%%% Géométrie: dessins et figures %%%%%%
+\usepackage{tikz}
+%%%%%% Graphes: APMEP
+%\usepackage{pstricks,pst-plot,pst-text,pst-tree,pst-node}
+%%%%%% Fond, image en haut à gauche, et autres kékéitudes %%%%%%
+%%\usepackage{wallpaper}
+%%%%%% tableaux %%%%%%
+
+
+%%%%%% Fonte
+
+
+\usetheme{Darmstadt}
+\end{comment}
+
+\setbeamercovered{transparent}
+
+
+
+%\title{Algorithme de Dijkstra}
+
+
+%\shorthandoff{:} 
+%%%%%%%%%%%%%%%%%%%%% Styles %%%%%%%%%%%%%%%%%%%%%
+\pgfdeclarelayer{background}
+\pgfsetlayers{background,main}
+\tikzstyle{preno}=[semithick] % arêtes non orientées.
+\tikzstyle{pre}=[->,>=stealth,semithick] % arêtes orientées.
+\tikzstyle{select}=[-,cap=round,style=nearly transparent,line width=6pt] %
+\tikzstyle{fl_actif}=[-,cap=round,style=nearly transparent,line width=6pt,color=black!50!red]
+\tikzstyle{infini} =[circle,thick,inner sep=0pt,minimum size=6mm,node distance=20mm,draw=black!50,fill=blue!5]
+\tikzstyle{encours}=[circle,thick,inner sep=0pt,minimum size=6mm,node distance=20mm,draw=blue!50,fill=blue!20]
+\tikzstyle{fini}   =[circle,thick,inner sep=0pt,minimum size=6mm,node distance=20mm,draw=black!80,fill=black!30]
+\tikzstyle{actif}  =[circle,thick,inner sep=0pt,minimum size=6mm,node distance=20mm,draw=black!80!red,fill=red!20!black!30]
+\section*{Algorimo de Dijkstra}
+
+\begin{frame}
+	\begin{columns}
+	\column[T]{0.5\linewidth}
+	\begin{block}{Problema}
+		Encontrar os menores caminhos de um vértice $v \in V$ para os demais vértices de um grafo ponderado $G=(V,E)$
+	\end{block}
+	\column[T]{0.5\linewidth}
+		\input{grafo.tex}
+	\end{columns}
+\end{frame}
+
+\begin{frame}
+	\begin{block}{Menor caminho entre $s$ e $t$}
+		Sequência de vértices entre a origem e o destino: $path=(s,v_{1},v_{2},\cdots,t)$.
+	\end{block}
+    \begin{block}{Estrutura ótima}
+    O menor caminho $s$ até $t$ possui menores caminhos dentro de si. \\
+    Se o menor caminho de $s$ para $t$ passa por $v_{k}$, então o caminho $(s,v_{1},\cdots, v_{k}$) é o menor caminho de $s$ até $v_{k}$.
+    \end{block}
+\end{frame}
+
+\begin{frame}
+\begin{block}{Exemplo 1} %Exemple de CLR
+Determine os caminhos mais curtos a partir da origem  $ A $ neste grafo:
+\pause
+%%%%%%%%%%%%%%%%%%%%% Présentation du graphe %%%%%%%%%%%%%%%%%%%%%
+\begin{center}
+\begin{tikzpicture}[>=stealth,scale=1]
+  \node[encours,label={[red]left:A}]      (s)                            {};
+  \node[infini,label={[red]above:B}]      (t)        [above right of=s]  {};
+  \node[infini,label={[red]below:E}]      (y)        [below right of=s]  {};
+  \node[infini,label={[red]above right:C}]      (x)        [right of=t]  {};
+  \node[infini,label={[red]below right:D}]      (z)        [right of=y]  {};
+% flèches soulignées.
+
+% flèches et numéros
+\draw[pre] (s) to node[auto] {$10$} (t) ;
+\draw[pre] (s) to node[auto,swap] {$5$} (y) ;
+\draw[pre] (t) to node[auto] {$1$} (x) ;
+\draw[pre] (y) to node[auto,near end] {$9$} (x) ;
+\draw[pre] (y) to node[auto,swap] {$2$} (z) ;
+\draw[pre,bend right=20] (y) to node[auto,swap] {$3$} (t) ;
+\draw[pre,bend right=20] (t) to node[auto,swap] {$2$} (y) ;
+\draw[pre,bend right=20] (x) to node[auto,swap] {$4$} (z) ;
+\draw[pre,bend right=20] (z) to node[auto,swap] {$6$} (x) ;
+\draw[pre,bend left=80] (z) to node[auto] {$7$} (s) ;
+\end{tikzpicture}
+\end{center}
+\end{block}
+\end{frame}
+\subsection*{Primeiro exemplo}
+
+\begin{frame} 
+$A$ começa com distância $ 0 $, pois é a origem, e a distância atual dos outros para $ A $ é $\infty$.
+\begin{columns}
+\column[T]{0.5\linewidth}
+%%%%%%%%%%%%%%%%%%%%% Étape 1 %%%%%%%%%%%%%%%%%%%%%
+\begin{tikzpicture}[>=stealth,scale=1]
+  \node[encours,label={[red]left:A}]      (s)                            {$0$};
+  \node[infini,label={[red]above:B}]      (t)        [above right of=s]  {$\infty$};
+  \node[infini,label={[red]below:E}]      (y)        [below right of=s]  {$\infty$};
+  \node[infini,label={[red]above right:C}]      (x)        [right of=t]        {$\infty$};
+  \node[infini,label={[red]below right:D}]      (z)        [right of=y]        {$\infty$};
+% flèches soulignées.
+\begin{pgfonlayer}{background}
+
+\end{pgfonlayer}
+% flèches et numéros
+\draw[pre] (s) to node[auto] {$10$} (t) ;
+\draw[pre] (s) to node[auto,swap] {$5$} (y) ;
+\draw[pre] (t) to node[auto] {$1$} (x) ;
+\draw[pre] (y) to node[auto,near end] {$9$} (x) ;
+\draw[pre] (y) to node[auto,swap] {$2$} (z) ;
+\draw[pre,bend right=20] (y) to node[auto,swap] {$3$} (t) ;
+\draw[pre,bend right=20] (t) to node[auto,swap] {$2$} (y) ;
+\draw[pre,bend right=20] (x) to node[auto,swap] {$4$} (z) ;
+\draw[pre,bend right=20] (z) to node[auto,swap] {$6$} (x) ;
+\draw[pre,bend left=80] (z) to node[auto] {$7$} (s) ;
+\end{tikzpicture}
+\column[T]{0.5\linewidth}
+%\begin{block}{}
+\vspace{7mm}
+\begin{tabular}{|c|c|c|c|c|} \hline
+A & B & C & D & E \\ \hline
+\fbox{$0$} & $\infty$ & $\infty$ & $\infty$ & $\infty$ \\ 
+$\bullet$ & & & & \\ 
+$\bullet$ & & & & \\ 
+$\bullet$ & & & & \\ 
+$\bullet$ & & & & \\ 
+$\bullet$ & & & & \\ 
+\end{tabular}
+%\end{bloc}
+\end{columns}
+\end{frame}
+
+
+\begin{frame} 
+Processando cada aresta (\textit{relax}) que sai do vértice selecionado.
+\begin{columns}
+\column[T]{0.5\linewidth}
+%%%%%%%%%%%%%%%%%%%%% Étape 2.1 %%%%%%%%%%%%%%%%%%%%%
+\begin{tikzpicture}[>=stealth,scale=1]
+  \node[actif,label={[red]left:A}]      (s)                            {$0$};
+  \node[infini,label={[red]above:B}]      (t)        [above right of=s]  {$10$};
+  \node[infini,label={[red]below:E}]      (y)        [below right of=s]  {$5$};
+  \node[infini,label={[red]above right:C}]      (x)        [right of=t]        {$\infty$};
+  \node[infini,label={[red]below right:D}]      (z)        [right of=y]        {$\infty$};
+% flèches soulignées.
+\begin{pgfonlayer}{background}
+\draw[fl_actif] (s) to (t) ;
+\draw[fl_actif] (s) to (y) ;
+\end{pgfonlayer}
+% flèches et numéros
+\draw[pre] (s) to node[auto] {$10$} (t) ;
+\draw[pre] (s) to node[auto,swap] {$5$} (y) ;
+\draw[pre] (t) to node[auto] {$1$} (x) ;
+\draw[pre] (y) to node[auto,near end] {$9$} (x) ;
+\draw[pre] (y) to node[auto,swap] {$2$} (z) ;
+\draw[pre,bend right=20] (y) to node[auto,swap] {$3$} (t) ;
+\draw[pre,bend right=20] (t) to node[auto,swap] {$2$} (y) ;
+\draw[pre,bend right=20] (x) to node[auto,swap] {$4$} (z) ;
+\draw[pre,bend right=20] (z) to node[auto,swap] {$6$} (x) ;
+\draw[pre,bend left=80] (z) to node[auto] {$7$} (s) ;
+\end{tikzpicture}
+
+\column[T]{0.5\linewidth}
+%\begin{block}{}
+%\begin{tabularx}{5cm}{|X|X|X|X|X|} \hline
+\vspace{7mm}
+\begin{tabular}{|c|c|c|c|c|} \hline
+A & B & C & D & E \\ \hline
+\fbox{$0$} & $\infty$ & $\infty$ & $\infty$ & $\infty$ \\ 
+$\bullet $ & $10_A$ & $\infty$ & $\infty$ & $5_A$ \\ 
+$\bullet$ & & & & \\ 
+$\bullet$ & & & & \\
+$\bullet$ & & & & \\
+$\bullet$ & & & & \\
+\end{tabular}
+%\end{bloc}
+\end{columns}
+Nas colunas coloca-se a distância atual de cada vértice para a origem.
+O vértice que o precede no menor caminho é colocado como subscrito.
+\end{frame}
+
+
+\begin{frame} 
+Escolhe-se para continuar a busca outro vértice ainda não processado, com menor distância, neste caso o $ E $.
+\begin{columns}
+\column[T]{0.5\linewidth}
+%%%%%%%%%%%%%%%%%%%%% Étape 2.2 %%%%%%%%%%%%%%%%%%%%%
+\begin{tikzpicture}[>=stealth,scale=1]
+  \node[actif,label={[red]left:A}]      (s)                            {$0$};
+  \node[infini,label={[red]above:B}]      (t)        [above right of=s]  {$10$};
+  \node[encours,label={[red]below:E}]      (y)        [below right of=s]  {$5$};
+  \node[infini,label={[red]above right:C}]      (x)        [right of=t]        {$\infty$};
+  \node[infini,label={[red]below right:D}]      (z)        [right of=y]        {$\infty$};
+% flèches soulignées.
+\begin{pgfonlayer}{background}
+\draw[fl_actif] (s) to (t) ;
+\draw[fl_actif] (s) to (y) ;
+\end{pgfonlayer}
+% flèches et numéros
+\draw[pre] (s) to node[auto] {$10$} (t) ;
+\draw[pre] (s) to node[auto,swap] {$5$} (y) ;
+\draw[pre] (t) to node[auto] {$1$} (x) ;
+\draw[pre] (y) to node[auto,near end] {$9$} (x) ;
+\draw[pre] (y) to node[auto,swap] {$2$} (z) ;
+\draw[pre,bend right=20] (y) to node[auto,swap] {$3$} (t) ;
+\draw[pre,bend right=20] (t) to node[auto,swap] {$2$} (y) ;
+\draw[pre,bend right=20] (x) to node[auto,swap] {$4$} (z) ;
+\draw[pre,bend right=20] (z) to node[auto,swap] {$6$} (x) ;
+\draw[pre,bend left=80] (z) to node[auto] {$7$} (s) ;
+\end{tikzpicture}
+
+\column[T]{0.5\linewidth}
+%\begin{block}{}
+%\begin{tabularx}{5cm}{|X|X|X|X|X|} \hline
+\vspace{7mm}
+\begin{tabular}{|c|c|c|c|c|} \hline
+A & B & C & D & E \\ \hline
+$0$ & $\infty$ & $\infty$ & $\infty$ & $\infty$ \\ 
+$\bullet $ & $10_A$ & $\infty$ & $\infty$ & \fbox{$5_A$} \\ 
+$\bullet$ & & & & $\bullet$\\ 
+$\bullet$ & & & & $\bullet$\\ 
+$\bullet$ & & & & $\bullet$\\ 
+$\bullet$ & & & & $\bullet$\\ 
+\end{tabular}
+%\end{bloc}
+\end{columns}
+\end{frame}
+
+
+
+
+\begin{frame} 
+E assim por diante.
+\begin{columns}
+\column[T]{0.5\linewidth}
+%%%%%%%%%%%%%%%%%%%%% Étape 3.1 %%%%%%%%%%%%%%%%%%%%%
+\begin{tikzpicture}[>=stealth,scale=1]
+  \node[fini,label={[red]left:A}]      (s)                            {$0$};
+  \node[infini,label={[red]above:B}]      (t)        [above right of=s]  {$8$};
+  \node[actif,label={[red]below:E}]      (y)        [below right of=s]  {$5$};
+  \node[infini,label={[red]above right:C}]      (x)        [right of=t]   {$14$};
+  \node[infini,label={[red]below right:D}]      (z)        [right of=y]   {$7$};
+% flèches soulignées.
+\begin{pgfonlayer}{background}
+\draw[select] (s) to (y) ;
+\draw[fl_actif,bend right=20] (y) to (t) ;
+\draw[fl_actif] (y) to (x) ;
+\draw[fl_actif] (y) to (z) ;
+\end{pgfonlayer}
+% flèches et numéros
+\draw[pre] (s) to node[auto] {$10$} (t) ;
+\draw[pre] (s) to node[auto,swap] {$5$} (y) ;
+\draw[pre] (t) to node[auto] {$1$} (x) ;
+\draw[pre] (y) to node[auto,near end] {$9$} (x) ;
+\draw[pre] (y) to node[auto,swap] {$2$} (z) ;
+\draw[pre,bend right=20] (y) to node[auto,swap] {$3$} (t) ;
+\draw[pre,bend right=20] (t) to node[auto,swap] {$2$} (y) ;
+\draw[pre,bend right=20] (x) to node[auto,swap] {$4$} (z) ;
+\draw[pre,bend right=20] (z) to node[auto,swap] {$6$} (x) ;
+\draw[pre,bend left=80] (z) to node[auto] {$7$} (s) ;
+\end{tikzpicture}
+\column[T]{0.5\linewidth}
+%\begin{block}{}
+\vspace{7mm}
+\begin{tabular}{|c|c|c|c|c|} \hline
+A & B & C & D & E \\ \hline
+$0$ & $\infty$ & $\infty$ & $\infty$ & $\infty$ \\ 
+$\bullet $ & $10_A$ & $\infty$ & $\infty$ & \fbox{$5_A$} \\ 
+$\bullet $ & $8_E$ & $14_E$ & $7_E$ & $\bullet $\\ 
+$\bullet $ & & &  & $\bullet $\\ 
+$\bullet $ & & &  & $\bullet $\\ 
+\end{tabular}
+%\end{bloc}
+\end{columns}
+\end{frame}
+
+
+
+\begin{frame} 
+\begin{columns}
+\column[T]{0.5\linewidth}
+%%%%%%%%%%%%%%%%%%%%% Étape 3.2 %%%%%%%%%%%%%%%%%%%%%
+\begin{tikzpicture}[>=stealth,scale=1]
+  \node[fini,label={[red]left:A}]      (s)                            {$0$};
+  \node[infini,label={[red]above:B}]      (t)        [above right of=s]  {$8$};
+  \node[actif,label={[red]below:E}]      (y)        [below right of=s]  {$5$};
+  \node[infini,label={[red]above right:C}]      (x)        [right of=t]   {$14$};
+  \node[encours,label={[red]below right:D}]      (z)        [right of=y]   {$7$};
+% flèches soulignées.
+\begin{pgfonlayer}{background}
+\draw[select] (s) to (y) ;
+\draw[fl_actif,bend right=20] (y) to (t) ;
+\draw[fl_actif] (y) to (x) ;
+\draw[fl_actif] (y) to (z) ;
+\end{pgfonlayer}
+% flèches et numéros
+\draw[pre] (s) to node[auto] {$10$} (t) ;
+\draw[pre] (s) to node[auto,swap] {$5$} (y) ;
+\draw[pre] (t) to node[auto] {$1$} (x) ;
+\draw[pre] (y) to node[auto,near end] {$9$} (x) ;
+\draw[pre] (y) to node[auto,swap] {$2$} (z) ;
+\draw[pre,bend right=20] (y) to node[auto,swap] {$3$} (t) ;
+\draw[pre,bend right=20] (t) to node[auto,swap] {$2$} (y) ;
+\draw[pre,bend right=20] (x) to node[auto,swap] {$4$} (z) ;
+\draw[pre,bend right=20] (z) to node[auto,swap] {$6$} (x) ;
+\draw[pre,bend left=80] (z) to node[auto] {$7$} (s) ;
+\end{tikzpicture}
+\column[T]{0.5\linewidth}
+%\begin{block}{}
+\vspace{7mm}
+\begin{tabular}{|c|c|c|c|c|} \hline
+A & B & C & D & E \\ \hline
+$0$ & $\infty$ & $\infty$ & $\infty$ & $\infty$ \\ 
+$\bullet $ & $10_A$ & $\infty$ & $\infty$ & $5_A$ \\ 
+$\bullet $ & $8_E$ & $14_E$ & \fbox{$7_E$} & $\bullet $\\ 
+$\bullet $ & & & $\bullet $ & $\bullet $\\ 
+$\bullet $ & & & $\bullet $ & $\bullet $\\ 
+\end{tabular}
+%\end{bloc}
+\end{columns}
+\end{frame}
+
+
+
+
+
+\begin{frame} 
+\begin{columns}
+\column[T]{0.5\linewidth}
+%%%%%%%%%%%%%%%%%%%%% Étape 4.1 %%%%%%%%%%%%%%%%%%%%%
+\begin{tikzpicture}[>=stealth,scale=1]
+  \node[fini,label={[red]left:A}]      (s)                            {$0$};
+  \node[infini,label={[red]above:B}]      (t)        [above right of=s]  {$8$};
+  \node[fini,label={[red]below:E}]      (y)        [below right of=s]  {$5$};
+  \node[infini,label={[red]above right:C}]      (x)        [right of=t]        {$13$};
+  \node[actif,label={[red]below right:D}]      (z)        [right of=y]        {$7$};
+% flèches soulignées.
+\begin{pgfonlayer}{background}
+\draw[select] (s) to (y) ;
+\draw[select,bend right=20] (y) to (t) ;
+\draw[fl_actif,bend right=20] (z) to (x) ;
+\draw[select] (y) to (z) ;
+\end{pgfonlayer}
+% flèches et numéros
+\draw[pre] (s) to node[auto] {$10$} (t) ;
+\draw[pre] (s) to node[auto,swap] {$5$} (y) ;
+\draw[pre] (t) to node[auto] {$1$} (x) ;
+\draw[pre] (y) to node[auto,near end] {$9$} (x) ;
+\draw[pre] (y) to node[auto,swap] {$2$} (z) ;
+\draw[pre,bend right=20] (y) to node[auto,swap] {$3$} (t) ;
+\draw[pre,bend right=20] (t) to node[auto,swap] {$2$} (y) ;
+\draw[pre,bend right=20] (x) to node[auto,swap] {$4$} (z) ;
+\draw[pre,bend right=20] (z) to node[auto,swap] {$6$} (x) ;
+\draw[pre,bend left=80] (z) to node[auto] {$7$} (s) ;
+\end{tikzpicture}
+\column[T]{0.5\linewidth}
+%\begin{block}{}
+\vspace{7mm}
+\begin{tabular}{|c|c|c|c|c|} \hline
+A & B & C & D & E \\ \hline
+$0$ & $\infty$ & $\infty$ & $\infty$ & $\infty$ \\ 
+$\bullet $ & $10_A$ & $\infty$ & $\infty$ & $5_A$ \\ 
+$\bullet $ & $8_E$ & $14_E$ & \fbox{$7_E$} & $\bullet $\\ 
+$\bullet $ & $8_E$ & $13_D$ & $\bullet$ & $\bullet $\\ 
+$\bullet$  &  &  & $\bullet$ & $\bullet$ \\ 
+$\bullet$  &  &  & $\bullet$ & $\bullet$ \\ 
+\end{tabular}
+%\end{bloc}
+\end{columns}
+\end{frame}
+
+
+
+
+\begin{frame} 
+\begin{columns}
+\column[T]{0.5\linewidth}
+%%%%%%%%%%%%%%%%%%%%% Étape 4.2 %%%%%%%%%%%%%%%%%%%%%
+\begin{tikzpicture}[>=stealth,scale=1]
+  \node[fini,label={[red]left:A}]      (s)                            {$0$};
+  \node[encours,label={[red]above:B}]      (t)        [above right of=s]  {$8$};
+  \node[fini,label={[red]below:E}]      (y)        [below right of=s]  {$5$};
+  \node[infini,label={[red]above right:C}]      (x)        [right of=t]        {$13$};
+  \node[actif,label={[red]below right:D}]      (z)        [right of=y]        {$7$};
+% flèches soulignées.
+\begin{pgfonlayer}{background}
+\draw[select] (s) to (y) ;
+\draw[select,bend right=20] (y) to (t) ;
+\draw[fl_actif,bend right=20] (z) to (x) ;
+\draw[select] (y) to (z) ;
+\end{pgfonlayer}
+% flèches et numéros
+\draw[pre] (s) to node[auto] {$10$} (t) ;
+\draw[pre] (s) to node[auto,swap] {$5$} (y) ;
+\draw[pre] (t) to node[auto] {$1$} (x) ;
+\draw[pre] (y) to node[auto,near end] {$9$} (x) ;
+\draw[pre] (y) to node[auto,swap] {$2$} (z) ;
+\draw[pre,bend right=20] (y) to node[auto,swap] {$3$} (t) ;
+\draw[pre,bend right=20] (t) to node[auto,swap] {$2$} (y) ;
+\draw[pre,bend right=20] (x) to node[auto,swap] {$4$} (z) ;
+\draw[pre,bend right=20] (z) to node[auto,swap] {$6$} (x) ;
+\draw[pre,bend left=80] (z) to node[auto] {$7$} (s) ;
+\end{tikzpicture}
+\column[T]{0.5\linewidth}
+%\begin{block}{}
+\vspace{7mm}
+\begin{tabular}{|c|c|c|c|c|} \hline
+A & B & C & D & E \\ \hline
+$0$ & $\infty$ & $\infty$ & $\infty$ & $\infty$ \\ 
+$\bullet $ & $10_A$ & $\infty$ & $\infty$ & $5_A$ \\ 
+$\bullet $ & $8_E$ & $14_E$ & $7_E$ & $\bullet $\\ 
+$\bullet $ & \fbox{$8_E$} & $13_D$ & $\bullet$ & $\bullet $\\ 
+$\bullet$  & $\bullet$ &  & $\bullet$ & $\bullet$ \\ 
+$\bullet$  & $\bullet$ &  & $\bullet$ & $\bullet$ \\ 
+\end{tabular}
+%\end{bloc}
+\end{columns}
+\end{frame}
+
+
+
+
+
+\begin{frame} 
+\begin{columns}
+\column[T]{0.5\linewidth}
+%%%%%%%%%%%%%%%%%%%%% Étape 5 %%%%%%%%%%%%%%%%%%%%%
+\begin{tikzpicture}[>=stealth,scale=1]
+  \node[fini,label={[red]left:A}]      (s)                            {$0$};
+  \node[actif,label={[red]above:B}]      (t)        [above right of=s]  {$8$};
+  \node[fini,label={[red]below:E}]      (y)        [below right of=s]  {$5$};
+  \node[encours,label={[red]above right:C}]      (x)        [right of=t] {$9$};
+  \node[fini,label={[red]below right:D}]      (z)        [right of=y] {$7$};
+% flèches soulignées.
+\begin{pgfonlayer}{background}
+\draw[select] (s) to (y) ;
+\draw[select,bend right=20] (y) to (t) ;
+\draw[select] (y) to (z) ;
+\draw[fl_actif] (t) to (x) ;
+\end{pgfonlayer}
+% flèches et numéros
+\draw[pre] (s) to node[auto] {$10$} (t) ;
+\draw[pre] (s) to node[auto,swap] {$5$} (y) ;
+\draw[pre] (t) to node[auto] {$1$} (x) ;
+\draw[pre] (y) to node[auto,near end] {$9$} (x) ;
+\draw[pre] (y) to node[auto,swap] {$2$} (z) ;
+\draw[pre,bend right=20] (y) to node[auto,swap] {$3$} (t) ;
+\draw[pre,bend right=20] (t) to node[auto,swap] {$2$} (y) ;
+\draw[pre,bend right=20] (x) to node[auto,swap] {$4$} (z) ;
+\draw[pre,bend right=20] (z) to node[auto,swap] {$6$} (x) ;
+\draw[pre,bend left=80] (z) to node[auto] {$7$} (s) ;
+\end{tikzpicture}
+\column[T]{0.5\linewidth}
+%\begin{block}{}
+\vspace{7mm}
+\begin{tabular}{|c|c|c|c|c|} \hline
+A & B & C & D & E \\ \hline
+$0$ & $\infty$ & $\infty$ & $\infty$ & $\infty$ \\ 
+$\bullet $ & $10_A$ & $\infty$ & $\infty$ & $5_A$ \\ 
+$\bullet $ & $8_E$ & $14_E$ & $7_E$ & $\bullet $\\ 
+$\bullet $ & $8_E$ & $13_D$ & $\bullet$ & $\bullet $\\ 
+$\bullet$  & $\bullet$ & \fbox{$9_B$} & $\bullet$ & $\bullet$ \\ 
+$\bullet$  & $\bullet$ & $\bullet$ & $\bullet$ & $\bullet$ \\ 
+\end{tabular}
+%\end{bloc}
+\end{columns}
+\end{frame}
+
+
+
+
+\begin{frame} 
+\begin{columns}
+\column[T]{0.5\linewidth}
+%%%%%%%%%%%%%%%%%%%%% Étape 6 %%%%%%%%%%%%%%%%%%%%%
+\begin{tikzpicture}[>=stealth,scale=1]
+  \node[fini,label={[red]left:A}]      (s)                            {$0$};
+  \node[fini,label={[red]above:B}]      (t)        [above right of=s]  {$8$};
+  \node[fini,label={[red]below:E}]      (y)        [below right of=s]  {$5$};
+  \node[fini,label={[red]above right:C}]      (x)        [right of=t]        {$9$};
+  \node[fini,label={[red]below right:D}]      (z)        [right of=y]        {$7$};
+% flèches soulignées.
+\begin{pgfonlayer}{background}
+\draw[select] (s) to (y) ;
+\draw[select,bend right=20] (y) to (t) ;
+\draw[select] (y) to (z) ;
+\draw[select] (t) to (x) ;
+\end{pgfonlayer}
+% flèches et numéros
+\draw[pre] (s) to node[auto] {$10$} (t) ;
+\draw[pre] (s) to node[auto,swap] {$5$} (y) ;
+\draw[pre] (t) to node[auto] {$1$} (x) ;
+\draw[pre] (y) to node[auto,near end] {$9$} (x) ;
+\draw[pre] (y) to node[auto,swap] {$2$} (z) ;
+\draw[pre,bend right=20] (y) to node[auto,swap] {$3$} (t) ;
+\draw[pre,bend right=20] (t) to node[auto,swap] {$2$} (y) ;
+\draw[pre,bend right=20] (x) to node[auto,swap] {$4$} (z) ;
+\draw[pre,bend right=20] (z) to node[auto,swap] {$6$} (x) ;
+\draw[pre,bend left=80] (z) to node[auto] {$7$} (s) ;
+\end{tikzpicture}
+\column[T]{0.5\linewidth}
+%\begin{block}{}
+\vspace{7mm}
+\begin{tabular}{|c|c|c|c|c|} \hline
+A & B & C & D & E \\ \hline
+$0$ & $\infty$ & $\infty$ & $\infty$ & $\infty$ \\ 
+$\bullet $ & $10_A$ & $\infty$ & $\infty$ & $5_A$ \\ 
+$\bullet $ & $8_E$ & $14_E$ & $7_E$ & $\bullet $\\ 
+$\bullet $ & $8_E$ & $13_D$ & $\bullet$ & $\bullet $\\ 
+$\bullet$  & $\bullet$ & $9_B$ & $\bullet$ & $\bullet$ \\ 
+$\bullet$  & $\bullet$ & $\bullet$ & $\bullet$ & $\bullet$ \\ 
+\end{tabular}
+%\end{bloc}
+\end{columns}
+Após a execução do \emph{Dijkstra}, as arestas destacadas formam uma \emph{árvore}, um grafo direcionado sem ciclo.
+\end{frame}
+\subsection*{Deuxième exemple}
+
+\begin{frame} 
+\begin{block}{Exemplo 2} %Exemple du transmath
+Encontrar caminhos mais curtos a partir da origem $ E $ neste grafo.
+%%%%%%%%%%%%%%%%%%%%% Présentation du graphe %%%%%%%%%%%%%%%%%%%%%
+\pause
+\begin{center}
+% Présentation
+\begin{tikzpicture}[>=stealth,scale=1]
+  \node[encours,label={[red]left:E}]      (E)                      {};
+  \node[infini,label={[red]above:A}]      (A)  [above right of=E]  {};
+  \node[infini,label={[red]below:B}]      (B)  [below right of=E]  {};
+  \node[infini,label={[red]above:C}]      (C)        [right of=A]  {};
+  \node[infini,label={[red]below:D}]      (D)        [right of=B]  {};
+  \node[infini,label={[red]right:S}]      (S)  [above right of=D]  {};
+% flèches soulignées.
+\begin{pgfonlayer}{background}
+
+\end{pgfonlayer}
+% flèches et numéros
+\draw[preno] (E) to node[auto]      {$3$} (A) ;
+\draw[preno] (E) to node[auto,swap] {$1$} (B) ;
+\draw[preno] (A) to node[auto,swap] {$1$} (B) ;
+\draw[preno] (A) to node[auto]      {$3$} (C) ;
+\draw[preno] (B) to node[auto] {$3$} (C) ;
+\draw[preno] (B) to node[auto,swap] {$5$} (D) ;
+\draw[preno] (C) to node[auto] {$1$}      (D) ;
+\draw[preno] (C) to node[auto] {$3$}      (S) ;
+\draw[preno] (D) to node[auto,swap] {$1$} (S) ;
+\end{tikzpicture}
+\end{center}
+\end{block}
+\end{frame}
+
+\begin{frame} 
+\begin{columns}
+\column[T]{0.55\linewidth}
+%%%%%%%%%%%%%%%%%%%%% Étape 1 %%%%%%%%%%%%%%%%%%%%%
+\begin{tikzpicture}[>=stealth,scale=1]
+  \node[encours,label={[red]left:E}]      (E)                      {$0$};
+  \node[infini,label={[red]above:A}]      (A)  [above right of=E]  {$\infty$};
+  \node[infini,label={[red]below:B}]      (B)  [below right of=E]  {$\infty$};
+  \node[infini,label={[red]above:C}]      (C)        [right of=A]  {$\infty$};
+  \node[infini,label={[red]below:D}]      (D)        [right of=B]  {$\infty$};
+  \node[infini,label={[red]right:S}]      (S)  [above right of=D]  {$\infty$};
+% flèches soulignées.
+\begin{pgfonlayer}{background}
+
+\end{pgfonlayer}
+% flèches et numéros
+\draw[preno] (E) to node[auto]      {$3$} (A) ;
+\draw[preno] (E) to node[auto,swap] {$1$} (B) ;
+\draw[preno] (A) to node[auto,swap] {$1$} (B) ;
+\draw[preno] (A) to node[auto]      {$3$} (C) ;
+\draw[preno] (B) to node[auto] {$3$} (C) ;
+\draw[preno] (B) to node[auto,swap] {$5$} (D) ;
+\draw[preno] (C) to node[auto] {$1$}      (D) ;
+\draw[preno] (C) to node[auto] {$3$}      (S) ;
+\draw[preno] (D) to node[auto,swap] {$1$} (S) ;
+\end{tikzpicture}
+
+\column[T]{0.45\linewidth}
+%\begin{block}{}
+\vspace{7mm}
+\begin{tabular}{|c|c|c|c|c|c|} \hline
+E & A & B & C & D & S \\ \hline
+\fbox{$0$} & $\infty$ & $\infty$ & $\infty$ & $\infty$  & $\infty$ \\ 
+$\bullet$ & & & & & \\ 
+$\bullet$  & & & & & \\ 
+$\bullet$  & & & & & \\ 
+$\bullet$  & & & & & \\ 
+$\bullet$  & & & & & \\ 
+\end{tabular}
+%\end{bloc}
+\end{columns}
+\end{frame}
+
+\begin{frame} 
+\begin{columns}
+\column[T]{0.55\linewidth}
+%%%%%%%%%%%%%%%%%%%%% Étape 2 %%%%%%%%%%%%%%%%%%%%%
+\begin{tikzpicture}[>=stealth,scale=1]
+  \node[actif,label={[red]left:E}]      (E)                      {$0$};
+  \node[infini,label={[red]above:A}]      (A)  [above right of=E]  {$3$};
+  \node[encours,label={[red]below:B}]      (B)  [below right of=E]  {$1$};
+  \node[infini,label={[red]above:C}]      (C)        [right of=A]  {$\infty$};
+  \node[infini,label={[red]below:D}]      (D)        [right of=B]  {$\infty$};
+  \node[infini,label={[red]right:S}]      (S)  [above right of=D]  {$\infty$};
+% flèches soulignées.
+\begin{pgfonlayer}{background}
+\draw[fl_actif] (E) to (A) ;
+\draw[fl_actif] (E) to (B) ;
+\end{pgfonlayer}
+% flèches et numéros
+\draw[preno] (E) to node[auto]      {$3$} (A) ;
+\draw[preno] (E) to node[auto,swap] {$1$} (B) ;
+\draw[preno] (A) to node[auto,swap] {$1$} (B) ;
+\draw[preno] (A) to node[auto]      {$3$} (C) ;
+\draw[preno] (B) to node[auto] {$3$} (C) ;
+\draw[preno] (B) to node[auto,swap] {$5$} (D) ;
+\draw[preno] (C) to node[auto] {$1$}      (D) ;
+\draw[preno] (C) to node[auto] {$3$}      (S) ;
+\draw[preno] (D) to node[auto,swap] {$1$} (S) ;
+\end{tikzpicture}
+\column[T]{0.45\linewidth}
+%\begin{block}{}
+\vspace{7mm}
+\begin{tabular}{|c|c|c|c|c|c|} \hline
+E & A & B & C & D & S \\ \hline
+$0$ & $\infty$ & $\infty$ & $\infty$ & $\infty$ & $\infty$ \\ 
+$\bullet$  & $3_E$ & \fbox{$1_E$} & $\infty$ & $\infty$ & $\infty$ \\ 
+$\bullet$  & & $\bullet$ & & &\\ 
+$\bullet$  & & $\bullet$ & & &\\ 
+$\bullet$  & & $\bullet$ & & &\\ 
+$\bullet$  & & $\bullet$ & & &\\ 
+\end{tabular}
+%\end{bloc}
+\end{columns}
+\end{frame}
+
+\begin{frame} 
+\begin{columns}
+\column[T]{0.55\linewidth}
+%%%%%%%%%%%%%%%%%%%%% Étape 3 %%%%%%%%%%%%%%%%%%%%%
+\begin{tikzpicture}[>=stealth,scale=1]
+  \node[fini,label={[red]left:E}]      (E)                      {$0$};
+  \node[encours,label={[red]above:A}]      (A)  [above right of=E]  {$2$};
+  \node[actif,label={[red]below:B}]      (B)  [below right of=E]  {$1$};
+  \node[infini,label={[red]above:C}]      (C)        [right of=A]  {$4$};
+  \node[infini,label={[red]below:D}]      (D)        [right of=B]  {$6$};
+  \node[infini,label={[red]right:S}]      (S)  [above right of=D]  {$\infty$};
+% flèches soulignées.
+\begin{pgfonlayer}{background}
+\draw[select] (E) to (B) ;
+\draw[fl_actif] (A) to (B) ;
+\draw[fl_actif] (C) to (B) ;
+\draw[fl_actif] (D) to (B) ;
+\end{pgfonlayer}
+% flèches et numéros
+\draw[preno] (E) to node[auto]      {$3$} (A) ;
+\draw[preno] (E) to node[auto,swap] {$1$} (B) ;
+\draw[preno] (A) to node[auto,swap] {$1$} (B) ;
+\draw[preno] (A) to node[auto]      {$3$} (C) ;
+\draw[preno] (B) to node[auto] {$3$} (C) ;
+\draw[preno] (B) to node[auto,swap] {$5$} (D) ;
+\draw[preno] (C) to node[auto] {$1$}      (D) ;
+\draw[preno] (C) to node[auto] {$3$}      (S) ;
+\draw[preno] (D) to node[auto,swap] {$1$} (S) ;
+\end{tikzpicture}
+\column[T]{0.45\linewidth}
+%\begin{block}{}
+\vspace{7mm}
+\begin{tabular}{|c|c|c|c|c|c|} \hline
+E & A & B & C & D & S \\ \hline
+$0$ & $\infty$ & $\infty$ & $\infty$ & $\infty$ & $\infty$ \\ 
+$\bullet$  & $3_E$ & $1_E$ & $\infty$ & $\infty$ & $\infty$\\ 
+$\bullet$  &\fbox{$2_B$} & $\bullet$ &  $4_B$ & $6_B$&$\infty$\\ 
+$\bullet$  & $\bullet$ & $\bullet$ & & &\\ 
+$\bullet$  & $\bullet$ & $\bullet$ & & &\\ 
+$\bullet$  & $\bullet$ & $\bullet$ & & &\\ 
+\end{tabular}
+%\end{bloc}
+\end{columns}
+\end{frame}
+
+\begin{frame} 
+\begin{columns}
+\column[T]{0.55\linewidth}
+%%%%%%%%%%%%%%%%%%%%% Étape 4 %%%%%%%%%%%%%%%%%%%%%
+\begin{tikzpicture}[>=stealth,scale=1]
+  \node[fini,label={[red]left:E}]      (E)                      {$0$};
+  \node[actif,label={[red]above:A}]      (A)  [above right of=E]  {$2$};
+  \node[fini,label={[red]below:B}]      (B)  [below right of=E]  {$1$};
+  \node[encours,label={[red]above:C}]      (C)        [right of=A]  {$4$};
+  \node[infini,label={[red]below:D}]      (D)        [right of=B]  {$6$};
+  \node[infini,label={[red]right:S}]      (S)  [above right of=D]  {$\infty$};
+% flèches soulignées.
+\begin{pgfonlayer}{background}
+\draw[select] (E) to (B) ;
+\draw[select] (A) to (B) ;
+\draw[select] (C) to (B) ;
+\draw[select] (D) to (B) ;
+\draw[fl_actif] (A) to (C) ;
+\end{pgfonlayer}
+% flèches et numéros
+\draw[preno] (E) to node[auto]      {$3$} (A) ;
+\draw[preno] (E) to node[auto,swap] {$1$} (B) ;
+\draw[preno] (A) to node[auto,swap] {$1$} (B) ;
+\draw[preno] (A) to node[auto]      {$3$} (C) ;
+\draw[preno] (B) to node[auto] {$3$} (C) ;
+\draw[preno] (B) to node[auto,swap] {$5$} (D) ;
+\draw[preno] (C) to node[auto] {$1$}      (D) ;
+\draw[preno] (C) to node[auto] {$3$}      (S) ;
+\draw[preno] (D) to node[auto,swap] {$1$} (S) ;
+\end{tikzpicture}
+\column[T]{0.45\linewidth}
+%\begin{block}{}
+\vspace{7mm}
+\begin{tabular}{|c|c|c|c|c|c|} \hline
+E & A & B & C & D & S \\ \hline
+$0$ & $\infty$ & $\infty$ & $\infty$ & $\infty$ & $\infty$ \\ 
+$\bullet$  & $3_E$ & $1_E$ & $\infty$ & $\infty$ & $\infty$\\ 
+$\bullet$  & $2_B$ & $\bullet$ &  $4_B$ & $6_B$&$\infty$\\ 
+$\bullet$  & $\bullet$ & $\bullet$ &\fbox{$4_B$} & $6_B$ & $\infty$\\ 
+$\bullet$  & $\bullet$ & $\bullet$ & $\bullet$ & &\\ 
+$\bullet$  & $\bullet$ & $\bullet$ & $\bullet$ & &\\ 
+\end{tabular}
+%\end{bloc}
+\end{columns}
+\end{frame}
+
+\begin{frame} 
+\begin{columns}
+\column[T]{0.55\linewidth}
+%%%%%%%%%%%%%%%%%%%%% Étape 5 %%%%%%%%%%%%%%%%%%%%%
+\begin{tikzpicture}[>=stealth,scale=1]
+  \node[fini,label={[red]left:E}]      (E)                      {$0$};
+  \node[fini,label={[red]above:A}]      (A)  [above right of=E]  {$2$};
+  \node[fini,label={[red]below:B}]      (B)  [below right of=E]  {$1$};
+  \node[actif,label={[red]above:C}]      (C)        [right of=A]  {$4$};
+  \node[encours,label={[red]below:D}]      (D)        [right of=B]  {$5$};
+  \node[infini,label={[red]right:S}]      (S)  [above right of=D]  {$7$};
+% flèches soulignées.
+\begin{pgfonlayer}{background}
+\draw[select] (E) to (B) ;
+\draw[select] (A) to (B) ;
+\draw[select] (C) to (B) ;
+\draw[fl_actif] (C) to (D) ;
+\draw[fl_actif] (C) to (S) ;
+\end{pgfonlayer}
+% flèches et numéros
+\draw[preno] (E) to node[auto]      {$3$} (A) ;
+\draw[preno] (E) to node[auto,swap] {$1$} (B) ;
+\draw[preno] (A) to node[auto,swap] {$1$} (B) ;
+\draw[preno] (A) to node[auto]      {$3$} (C) ;
+\draw[preno] (B) to node[auto] {$3$} (C) ;
+\draw[preno] (B) to node[auto,swap] {$5$} (D) ;
+\draw[preno] (C) to node[auto] {$1$}      (D) ;
+\draw[preno] (C) to node[auto] {$3$}      (S) ;
+\draw[preno] (D) to node[auto,swap] {$1$} (S) ;
+\end{tikzpicture}
+\column[T]{0.45\linewidth}
+%\begin{block}{}
+\vspace{7mm}
+\begin{tabular}{|c|c|c|c|c|c|} \hline
+E & A & B & C & D & S \\ \hline
+$0$ & $\infty$ & $\infty$ & $\infty$ & $\infty$ & $\infty$ \\ 
+$\bullet$  & $3_E$ & $1_E$ & $\infty$ & $\infty$ & $\infty$\\ 
+$\bullet$  & $2_B$ & $\bullet$ &  $4_B$ & $6_B$&$\infty$\\ 
+$\bullet$  & $\bullet$ & $\bullet$ & $4_B$ & $6_B$ & $\infty$\\ 
+$\bullet$  & $\bullet$ & $\bullet$ & $\bullet$ &\fbox{$5_C$} & $7_C$\\ 
+$\bullet$  & $\bullet$ & $\bullet$ & $\bullet$ &$\bullet$ &\\ 
+\end{tabular}
+%\end{bloc}
+\end{columns}
+\end{frame}
+
+\begin{frame} 
+\begin{columns}
+\column[T]{0.55\linewidth}
+%%%%%%%%%%%%%%%%%%%%% Étape 6 %%%%%%%%%%%%%%%%%%%%%
+\begin{tikzpicture}[>=stealth,scale=1]
+  \node[fini,label={[red]left:E}]      (E)                      {$0$};
+  \node[fini,label={[red]above:A}]      (A)  [above right of=E]  {$2$};
+  \node[fini,label={[red]below:B}]      (B)  [below right of=E]  {$1$};
+  \node[fini,label={[red]above:C}]      (C)        [right of=A]  {$4$};
+  \node[actif,label={[red]below:D}]      (D)        [right of=B]  {$5$};
+  \node[encours,label={[red]right:S}]      (S)  [above right of=D]  {$6$};
+% flèches soulignées.
+\begin{pgfonlayer}{background}
+\draw[select] (E) to (B) ;
+\draw[select] (A) to (B) ;
+\draw[select] (C) to (B) ;
+\draw[select] (D) to (C) ;
+\draw[fl_actif] (D) to (S) ;
+\end{pgfonlayer}
+% flèches et numéros
+\draw[preno] (E) to node[auto]      {$3$} (A) ;
+\draw[preno] (E) to node[auto,swap] {$1$} (B) ;
+\draw[preno] (A) to node[auto,swap] {$1$} (B) ;
+\draw[preno] (A) to node[auto]      {$3$} (C) ;
+\draw[preno] (B) to node[auto] {$3$} (C) ;
+\draw[preno] (B) to node[auto,swap] {$5$} (D) ;
+\draw[preno] (C) to node[auto] {$1$}      (D) ;
+\draw[preno] (C) to node[auto] {$3$}      (S) ;
+\draw[preno] (D) to node[auto,swap] {$1$} (S) ;
+\end{tikzpicture}
+\column[T]{0.45\linewidth}
+%\begin{block}{}
+\vspace{7mm}
+\begin{tabular}{|c|c|c|c|c|c|} \hline
+E & A & B & C & D & S \\ \hline
+$0$ & $\infty$ & $\infty$ & $\infty$ & $\infty$ & $\infty$ \\ 
+$\bullet$  & $3_E$ & $1_E$ & $\infty$ & $\infty$ & $\infty$\\ 
+$\bullet$  & $2_B$ & $\bullet$ &  $4_B$ & $6_B$&$\infty$\\ 
+$\bullet$  & $\bullet$ & $\bullet$ & $4_B$ & $6_B$ & $\infty$\\ 
+$\bullet$  & $\bullet$ & $\bullet$ & $\bullet$ & $5_C$ & $7_C$\\ 
+$\bullet$  & $\bullet$ & $\bullet$ & $\bullet$ &$\bullet$ & \fbox{$6_D$}\\ 
+\end{tabular}
+%\end{bloc}
+\end{columns}
+\end{frame}
+
+\begin{frame} 
+\begin{columns}
+\column[T]{0.55\linewidth}
+%%%%%%%%%%%%%%%%%%%%% Étape fin %%%%%%%%%%%%%%%%%%%%%
+\begin{tikzpicture}[>=stealth,scale=1]
+  \node[fini,label={[red]left:E}]      (E)                      {$0$};
+  \node[fini,label={[red]above:A}]      (A)  [above right of=E]  {$2$};
+  \node[fini,label={[red]below:B}]      (B)  [below right of=E]  {$1$};
+  \node[fini,label={[red]above:C}]      (C)        [right of=A]  {$4$};
+  \node[fini,label={[red]below:D}]      (D)        [right of=B]  {$5$};
+  \node[actif,label={[red]right:S}]      (S)  [above right of=D]  {$6$};
+% flèches soulignées.
+\begin{pgfonlayer}{background}
+\draw[select] (E) to (B) ;
+\draw[select] (A) to (B) ;
+\draw[select] (C) to (B) ;
+\draw[select] (D) to (C) ;
+\draw[select] (D) to (S) ;
+\end{pgfonlayer}
+% flèches et numéros
+\draw[preno] (E) to node[auto]      {$3$} (A) ;
+\draw[preno] (E) to node[auto,swap] {$1$} (B) ;
+\draw[preno] (A) to node[auto,swap] {$1$} (B) ;
+\draw[preno] (A) to node[auto]      {$3$} (C) ;
+\draw[preno] (B) to node[auto] {$3$} (C) ;
+\draw[preno] (B) to node[auto,swap] {$5$} (D) ;
+\draw[preno] (C) to node[auto] {$1$}      (D) ;
+\draw[preno] (C) to node[auto] {$3$}      (S) ;
+\draw[preno] (D) to node[auto,swap] {$1$} (S) ;
+\end{tikzpicture}
+\column[T]{0.45\linewidth}
+%\begin{block}{}
+\vspace{7mm}
+\begin{tabular}{|c|c|c|c|c|c|} \hline
+E & A & B & C & D & S \\ \hline
+$0$ & $\infty$ & $\infty$ & $\infty$ & $\infty$ & $\infty$ \\ 
+$\bullet$  & $3_E$ & $1_E$ & $\infty$ & $\infty$ & $\infty$\\ 
+$\bullet$  & $2_B$ & $\bullet$ &  $4_B$ & $6_B$&$\infty$\\ 
+$\bullet$  & $\bullet$ & $\bullet$ & $4_B$ & $6_B$ & $\infty$\\ 
+$\bullet$  & $\bullet$ & $\bullet$ & $\bullet$ & $5_C$ & $7_C$\\ 
+$\bullet$  & $\bullet$ & $\bullet$ & $\bullet$ &$\bullet$ & $6_D$\\ 
+\end{tabular}
+%\end{bloc}
+\end{columns}
+\end{frame}
+
+
+%%% Local Variables:                                                            
+%%% mode: latex                                                                 
+%%% TeX-PDF-mode: t                                                             
+%%% End:                                                                        
+\begin{comment}
+
+%\end{}
+\begin{frame} 
+\begin{columns}
+\column[T]{0.55\linewidth}
+%%%%%%%%%%%%%%%%%%%%% Étape  %%%%%%%%%%%%%%%%%%%%%
+
+\column[T]{0.45\linewidth}
+%\begin{block}{}
+\vspace{7mm}
+\begin{tabular}{|c|c|c|c|c|c|} \hline
+E & A & B & C & D & S \\ \hline
+$0$ & $\infty$ & $\infty$ & $\infty$ & $\infty$ & $\infty$ \\ 
+$\bullet$  & & & & &\\ 
+$\bullet$  & & & & &\\ 
+$\bullet$  & & & & &\\ 
+$\bullet$  & & & & &\\ 
+$\bullet$  & & & & &\\ 
+\end{tabular}
+%\end{bloc}
+\end{columns}
+\end{frame}
+\end{comment}
+

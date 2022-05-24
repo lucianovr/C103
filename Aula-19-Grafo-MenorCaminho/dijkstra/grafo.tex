@@ -1,0 +1,22 @@
+\begin{center}
+\begin{tikzpicture}[>=stealth,scale=1]
+  \node[encours,label={[red]left:A}]      (s)                            {};
+  \node[infini,label={[red]above:B}]      (t)        [above right of=s]  {};
+  \node[infini,label={[red]below:E}]      (y)        [below right of=s]  {};
+  \node[infini,label={[red]above right:C}]      (x)        [right of=t]  {};
+  \node[infini,label={[red]below right:D}]      (z)        [right of=y]  {};
+% flèches soulignées.
+
+% flèches et numéros
+\draw[pre] (s) to node[auto] {$10$} (t) ;
+\draw[pre] (s) to node[auto,swap] {$5$} (y) ;
+\draw[pre] (t) to node[auto] {$1$} (x) ;
+\draw[pre] (y) to node[auto,near end] {$9$} (x) ;
+\draw[pre] (y) to node[auto,swap] {$2$} (z) ;
+\draw[pre,bend right=20] (y) to node[auto,swap] {$3$} (t) ;
+\draw[pre,bend right=20] (t) to node[auto,swap] {$2$} (y) ;
+\draw[pre,bend right=20] (x) to node[auto,swap] {$4$} (z) ;
+\draw[pre,bend right=20] (z) to node[auto,swap] {$6$} (x) ;
+\draw[pre,bend left=80] (z) to node[auto] {$7$} (s) ;
+\end{tikzpicture}
+\end{center}
