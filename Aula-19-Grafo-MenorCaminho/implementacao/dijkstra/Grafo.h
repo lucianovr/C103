@@ -25,9 +25,6 @@ private:
 	bool digrafo;
 	list<Aresta>* listaAdj;
 
-	// Lista auxiliar para armazenar o vertice anterior do atual durante uma busca
-	int* pai; 
-
 public:
 	Grafo(bool _digrafo, int _numVertices);
 	~Grafo();
@@ -36,6 +33,5 @@ public:
 	void mostraArestas(void);
 
 	void dijkstra(int vInicio, int* dist, size_t dist_tam);
-	void getMinPath(int destino, int* caminho, int* caminho_tam);
 };
 

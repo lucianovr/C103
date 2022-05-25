@@ -33,25 +33,5 @@ int main()
 		cout << "dist[" << v << "] = " << dist[v] << endl;
 	}
 
-	cout << "Menor caminho de " << origem << " para 2\n";
-	int caminho[V];
-	int len = 0;
-	G.getMinPath(2, &caminho[0], &len);
-	for (int i = 0; i < len; i++)
-	{
-		cout << caminho[i] << " ";
-	}
-	cout << endl; 
-
-
-	cout << "Menor caminho de " << origem << " para 2\n";
-	len = 0;
-	G.getMinPath(3, &caminho[0], &len);
-	for (int i = 0; i < len; i++)
-	{
-		cout << caminho[i] << " ";
-	}
-	cout << endl; 
-
 	return 0;
 }

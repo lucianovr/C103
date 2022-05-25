@@ -14,7 +14,6 @@ Grafo::Grafo(bool _digrafo, int _numVertices)
 	digrafo = _digrafo;
 	numVertices = _numVertices;
 	listaAdj = new list<Aresta>[numVertices];
-	pai = new int[numVertices];
 }
 
 Grafo::~Grafo()
@@ -102,7 +101,6 @@ void Grafo::dijkstra(int vInicio, int* dist, size_t dist_tam)
 	}
 
 	dist[vInicio] = 0;
-	pai[vInicio] = -1;
 
 	int counter = 1;
 	while ( true )
@@ -141,7 +139,6 @@ void Grafo::dijkstra(int vInicio, int* dist, size_t dist_tam)
 			if (dist[w] > dist[v] + custo_vw)
 			{
 				dist[w] = dist[v] + custo_vw;
-				pai[w] = v;
 				cout << "Atualizado a distancia de " << w << " para " << dist[w] << endl;
 			}
 		}
@@ -149,20 +146,4 @@ void Grafo::dijkstra(int vInicio, int* dist, size_t dist_tam)
 	delete[] visitado;
 
 	cout << "\nFIM Dijkstra\n\n";
-}
-
-void Grafo::getMinPath(int destino, int* caminho, int* caminho_tam)
-{
-	int v = destino;
-	
-	*caminho_tam = 0;
-
-	while (v != -1)
-	{
-		caminho[ *caminho_tam ] = v;
-		(*caminho_tam)++;
-		v = pai[v];
-	}
-
-	reverse(caminho, caminho + *caminho_tam); 
 }
