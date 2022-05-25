@@ -40,7 +40,7 @@
 \tikzstyle{encours}=[circle,thick,inner sep=0pt,minimum size=6mm,node distance=20mm,draw=blue!50,fill=blue!20]
 \tikzstyle{fini}   =[circle,thick,inner sep=0pt,minimum size=6mm,node distance=20mm,draw=black!80,fill=black!30]
 \tikzstyle{actif}  =[circle,thick,inner sep=0pt,minimum size=6mm,node distance=20mm,draw=black!80!red,fill=red!20!black!30]
-\section*{Algorimo de Dijkstra}
+\section*{Algoritmo de Dijkstra}
 
 \begin{frame}
 	\begin{columns}
@@ -66,7 +66,6 @@
 \begin{frame}
 \begin{block}{Exemplo 1} %Exemple de CLR
 Determine os caminhos mais curtos a partir da origem  $ A $ neste grafo:
-\pause
 %%%%%%%%%%%%%%%%%%%%% Présentation du graphe %%%%%%%%%%%%%%%%%%%%%
 \begin{center}
 \begin{tikzpicture}[>=stealth,scale=1]
@@ -95,7 +94,8 @@ Determine os caminhos mais curtos a partir da origem  $ A $ neste grafo:
 \subsection*{Primeiro exemplo}
 
 \begin{frame} 
-$A$ começa com distância $ 0 $, pois é a origem, e a distância atual dos outros para $ A $ é $\infty$.
+$A$ começa com distância $ 0 $, pois é a origem, e a distância atual de $A$ para os outros vértices é inicializada como $\infty$.
+Na prática, pode ser utilizado um valor muito grande e que não seja uma distância válida para o problema.
 \begin{columns}
 \column[T]{0.5\linewidth}
 %%%%%%%%%%%%%%%%%%%%% Étape 1 %%%%%%%%%%%%%%%%%%%%%
@@ -138,7 +138,9 @@ $\bullet$ & & & & \\
 \end{frame}
 
 
-\begin{frame} 
+\begin{frame}
+Em cada iteração do algoritmo, o vértice com menor distância e ainda não processado é escolhido.
+Na primeira iteração, é escolhido o vértice inicial da busca, nesse caso o vértice A.
 Processando cada aresta (\textit{relax}) que sai do vértice selecionado.
 \begin{columns}
 \column[T]{0.5\linewidth}
@@ -182,13 +184,19 @@ $\bullet$ & & & & \\
 \end{tabular}
 %\end{bloc}
 \end{columns}
-Nas colunas coloca-se a distância atual de cada vértice para a origem.
-O vértice que o precede no menor caminho é colocado como subscrito.
+
+Seja $V$ o vertice selecionado e para cada $W$ vizinho de V, faça:
+\begin{equation}
+  dist[W] = min(dist[W], dist[V] + custo_{VW})
+\end{equation}
+
+
+
 \end{frame}
 
 
 \begin{frame} 
-Escolhe-se para continuar a busca outro vértice ainda não processado, com menor distância, neste caso o $ E $.
+Escolhe-se para continuar a busca outro vértice que possui a menor distância mas que ainda não foi processado, neste caso o $ E $.
 \begin{columns}
 \column[T]{0.5\linewidth}
 %%%%%%%%%%%%%%%%%%%%% Étape 2.2 %%%%%%%%%%%%%%%%%%%%%
@@ -231,6 +239,8 @@ $\bullet$ & & & & $\bullet$\\
 \end{tabular}
 %\end{bloc}
 \end{columns}
+O vértice $E$ foi escolhido e não o $B$ pois como $E$ possui a menor distância atual, podemos assumir que não tem como diminuir ela no futuro.
+O mesmo não é verdade para $B$.
 \end{frame}
 
 
@@ -519,9 +529,13 @@ $\bullet$  & $\bullet$ & $\bullet$ & $\bullet$ & $\bullet$ \\
 \end{tabular}
 %\end{bloc}
 \end{columns}
-Após a execução do \emph{Dijkstra}, as arestas destacadas formam uma \emph{árvore}, um grafo direcionado sem ciclo.
+Após a execução do \emph{Dijkstra}, as arestas destacadas formam uma \emph{árvore}: um grafo direcionado e sem ciclos.
 \end{frame}
-\subsection*{Deuxième exemple}
+
+
+
+
+\subsection*{Exemplo 2}
 
 \begin{frame} 
 \begin{block}{Exemplo 2} %Exemple du transmath
@@ -551,6 +565,7 @@ Encontrar caminhos mais curtos a partir da origem $ E $ neste grafo.
 \draw[preno] (C) to node[auto] {$1$}      (D) ;
 \draw[preno] (C) to node[auto] {$3$}      (S) ;
 \draw[preno] (D) to node[auto,swap] {$1$} (S) ;
+
 \end{tikzpicture}
 \end{center}
 \end{block}
