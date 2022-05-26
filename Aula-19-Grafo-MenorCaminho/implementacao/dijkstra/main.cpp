@@ -24,13 +24,15 @@ int main()
 	G.mostraArestas();
 
 	int dist[V];
+	int pai[V];
 	int origem = 0;
-	G.dijkstra(origem, dist, sizeof(dist));
+	G.dijkstra(origem, dist, pai, V);
 
 	cout << "Menor custo de " << origem << " para os demais vertices\n";
 	for (size_t v = 0; v < V; v++)
 	{
-		cout << "dist[" << v << "] = " << dist[v] << endl;
+		cout << "dist[" << v << "] = " << dist[v] << "\t\t pai[" << v << "] = " << pai[v] << endl;
+
 	}
 
 	return 0;

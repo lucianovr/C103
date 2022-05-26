@@ -32,6 +32,6 @@ public:
 	void removeAresta(int origem, int destino, bool removeArestaInversa);
 	void mostraArestas(void);
 
-	void dijkstra(int vInicio, int* dist, size_t dist_tam);
+	void dijkstra(int vInicio, int* dist, int* pai, size_t dist_tam);
 };
 

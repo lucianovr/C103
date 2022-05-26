@@ -83,7 +83,7 @@ void Grafo::mostraArestas(void)
 	}
 }
 
-void Grafo::dijkstra(int vInicio, int* dist, size_t dist_tam)
+void Grafo::dijkstra(int vInicio, int* dist, int* pai, size_t dist_tam)
 {
 	cout << "\n\n INICIO Dijkstra" << endl;
 	if (dist_tam < numVertices)
@@ -98,6 +98,7 @@ void Grafo::dijkstra(int vInicio, int* dist, size_t dist_tam)
 	{
 		dist[v] = INT32_MAX;
 		visitado[v] = false;
+		pai[v] = -1;
 	}
 
 	dist[vInicio] = 0;
@@ -139,6 +140,7 @@ void Grafo::dijkstra(int vInicio, int* dist, size_t dist_tam)
 			if (dist[w] > dist[v] + custo_vw)
 			{
 				dist[w] = dist[v] + custo_vw;
+				pai[w] = v;
 				cout << "Atualizado a distancia de " << w << " para " << dist[w] << endl;
 			}
 		}
